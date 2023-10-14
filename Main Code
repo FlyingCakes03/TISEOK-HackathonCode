@@ -1,0 +1,61 @@
+#include <Servo.h>\\\
+const byte COLUMN_NUM = 4; // Number of columns in the keypad
+
+// Define the keypad layout
+char keys[ROW_NUM][COLUMN_NUM] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+
+byte rowPins[ROW_NUM] = {7, 10, 11, 12}; // Connect to the row pinouts of the keypad
+byte colPins[COLUMN_NUM] = {3, 4, 5, 6}; // Connect to the column pinouts of the keypad
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROW_NUM, COLUMN_NUM);
+
+int buttonState = 0;
+int cleanCount = 0;
+bool isCleaning = false;
+
+void setup() {
+  servoMotor.attach(9); // Attach the servo to pin 9 (change if connected to a different pin)
+  pinMode(buttonPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  char key = keypad.getKey();
+
+  if (key == 'C') {  // Change 'A' to the appropriate key
+    startCleaning();
+  }
+
+  // Other loop code...
+}
+
+void startCleaning() {
+  if (!isCleaning) {
+    isCleaning = true;
+    digitalWrite(ledPin, HIGH); // Turn on the LED to indicate cleaning is in progress
+    Serial.println("Cleaning started!");
+
+    for (int i = 0; i < 4; i++) {
+      cleanKeyboard();
+      Serial.print("Cleaning Movement: ");
+      Serial.println(i + 1);
+    }
+
+    digitalWrite(ledPin, LOW); // Turn off the LED to indicate cleaning is done
+    Serial.println("Cleaning finished!");
+    isCleaning = false;
+  }
+}
+
+void cleanKeyboard() {
+  servoMotor.write(90); // Adjust the angle (0 to 180) to move the servo arm to a suitable position
+  delay(1000);          // Adjust the delay to control how long the servo stays in that position
+  servoMotor.write(0);  // Move the servo arm back to the starting position
+  delay(1000);
+}
